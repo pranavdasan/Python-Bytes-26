@@ -1,5 +1,6 @@
 import pygame
 import math
+import random
 pygame.init()
 
 # Screen dimensions
@@ -22,6 +23,8 @@ obstacle_width = 30
 obstacle_height = 30
 obstacle_x = SCREEN_WIDTH # Spawn the obstacle off screen
 obstacle_speed = 2 
+obstacle_type = "SINGLE"
+possible_types = ["SINGLE", "DOUBLE", "TALL"]
 
 # Ground variables
 ground_height = 20
@@ -74,9 +77,16 @@ while running:
     if obstacle_x + obstacle_width < 0:
         obstacle_x = SCREEN_WIDTH # Puts it back to right of screen
         score += 1 # Update score
+        obstacle_type = random.choices(possible_types, weights=[0.5, 0.2, 0.3], k=1)[0]
+        
 
-    # Create obstacle hitbox
-    obstacle = pygame.Rect(obstacle_x, ground_y - obstacle_height, obstacle_width, obstacle_height)
+    # Create obstacle hitbox, different type, different hitbox
+    if obstacle_type == "SINGLE":
+        obstacle = pygame.Rect(obstacle_x, ground_y - obstacle_height, obstacle_width, obstacle_height)
+    elif obstacle_type == "DOUBLE":
+        obstacle = pygame.Rect(obstacle_x-obstacle_width, ground_y - obstacle_height, 2*obstacle_width, obstacle_height*2)
+    elif obstacle_type == "TALL":
+        obstacle = pygame.Rect(obstacle_x, ground_y - 2*obstacle_height, obstacle_width, 2*obstacle_height)
 
     # Create player hitbox
     player = pygame.Rect(player_x, player_y, player_size, player_size)
@@ -89,10 +99,25 @@ while running:
     pygame.draw.rect(screen, (255, 0, 0), player)
 
     # Draw obstacle(s)
-    pygame.draw.polygon(screen, (0, 0, 255), [
-        (obstacle_x, ground_y),
-        (obstacle_x + obstacle_width/2,  ground_y - obstacle_height), 
-        (obstacle_x + obstacle_width, ground_y)])
+    if obstacle_type == "SINGLE":
+        pygame.draw.polygon(screen, (0, 0, 255), [
+            (obstacle_x, ground_y),
+            (obstacle_x + obstacle_width/2,  ground_y - obstacle_height), 
+            (obstacle_x + obstacle_width, ground_y)])
+    elif obstacle_type == "DOUBLE":
+        pygame.draw.polygon(screen, (0, 0, 255), [
+            (obstacle_x, ground_y),
+            (obstacle_x + obstacle_width/2 - obstacle_width,  ground_y - obstacle_height), 
+            (obstacle_x + obstacle_width, ground_y)])
+        pygame.draw.polygon(screen, (0, 0, 255), [
+            (obstacle_x, ground_y),
+            (obstacle_x + obstacle_width/2 - obstacle_width,  ground_y - obstacle_height), 
+            (obstacle_x + obstacle_width, ground_y)])
+    elif obstacle_type == "TALL":
+        pygame.draw.polygon(screen, (0, 0, 255), [
+            (obstacle_x, ground_y),
+            (obstacle_x + obstacle_width/2 - obstacle_width,  ground_y - 2*obstacle_height), 
+            (obstacle_x + obstacle_width, ground_y)])
 
     # Draw ground
     pygame.draw.rect(screen, (0, 255, 0), (0, ground_y, SCREEN_WIDTH, ground_height))
