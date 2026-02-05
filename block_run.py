@@ -17,6 +17,10 @@ player_y = SCREEN_HEIGHT - player_size - 20
 player_velocity_y = 0
 gravity = 10/fps
 score = 0
+life = 3
+invincibility = False
+invincibility_timer = 0
+color = (0, 0, 255)
 
 # Obstacle Variables
 obstacle_width = 30
@@ -57,6 +61,12 @@ while running:
     
     player_velocity_y += gravity
 
+    # invincibility timer
+    if invincibility:
+        invincibility_timer -= 1
+    if invincibility_timer <= 0:
+        invincibility = False
+
     # Collisions
     if player_y + player_size > ground_y:
         player_velocity_y = 0
@@ -75,9 +85,12 @@ while running:
 
     # Reset obstacle when it goes off screen
     if obstacle_x + obstacle_width < 0:
-        obstacle_x = SCREEN_WIDTH # Puts it back to right of screen
+        obstacle_x = SCREEN_WIDTH + random.randint(50, 250) # Puts it back to right of screen randomly
         score += 1 # Update score
+        if score % 5 == 0:
+            life += 1
         obstacle_type = random.choices(possible_types, weights=[0.5, 0.3, 0.2], k=1)[0]
+        color = (random.randint(0, 200), random.randint(0, 200), 255)
         
 
     # Create obstacle hitbox, different type, different hitbox
@@ -93,31 +106,38 @@ while running:
 
     # Detect obstacle collision
     if player.colliderect(obstacle):
-        running = False # Game over
- 
+        if invincibility:
+            pass
+        elif life == 1:
+            running = False # Game over
+        else:
+            life -= 1
+            invincibility = True
+            invincibility_timer = fps #1 second of invincibility
     # Draw player
     pygame.draw.rect(screen, (255, 0, 0), player)
 
+    #color = (random.randint(0, 255), random.randint(0, 255), 255)
     # Draw obstacle(s)
     if obstacle_type == "SINGLE":
-        pygame.draw.polygon(screen, (0, 0, 255), [
+        pygame.draw.polygon(screen, color, [
             (obstacle_x, ground_y),
             (obstacle_x + obstacle_width/2,  ground_y - obstacle_height), 
             (obstacle_x + obstacle_width, ground_y)])
     elif obstacle_type == "DOUBLE":
-        pygame.draw.polygon(screen, (0, 0, 255), [
+        pygame.draw.polygon(screen, color, [
           (obstacle_x, ground_y),
           (obstacle_x + obstacle_width / 2, ground_y - obstacle_height),
           (obstacle_x + obstacle_width, ground_y)
         ])
         
-        pygame.draw.polygon(screen, (0, 0, 255), [
+        pygame.draw.polygon(screen, color, [
           (obstacle_x-obstacle_width, ground_y),
           (obstacle_x + obstacle_width / 2 - obstacle_width, ground_y - obstacle_height),
           (obstacle_x, ground_y)
         ])
     elif obstacle_type == "TALL":
-        pygame.draw.polygon(screen, (0, 0, 255), [
+        pygame.draw.polygon(screen, color, [
             (obstacle_x, ground_y),
             (obstacle_x + obstacle_width/2,  ground_y - 2*obstacle_height), 
             (obstacle_x + obstacle_width, ground_y)])
@@ -129,9 +149,12 @@ while running:
     score_text = font.render(f"Score: {score}", True, (0,0,0))
     screen.blit(score_text, (10, 10))
 
+    # Draw life
+    life_text = font.render(f"Life: {life}", True, (0,0,0))
+    screen.blit(life_text, (200, 10))
+
     # Refresh Screen
     pygame.display.update()
     clock.tick(fps) # Set FPS
 
-pygame.quit()
-
+pygame.quit() 
