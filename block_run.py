@@ -53,7 +53,7 @@ while running:
     keys = pygame.key.get_pressed()
     
     if (keys[pygame.K_SPACE] or keys[pygame.K_w]) and player_y+player_size == ground_y:
-        player_velocity_y = -5
+        player_velocity_y = -6
     
     player_velocity_y += gravity
 
@@ -77,7 +77,7 @@ while running:
     if obstacle_x + obstacle_width < 0:
         obstacle_x = SCREEN_WIDTH # Puts it back to right of screen
         score += 1 # Update score
-        obstacle_type = random.choices(possible_types, weights=[0.5, 0.2, 0.3], k=1)[0]
+        obstacle_type = random.choices(possible_types, weights=[0.5, 0.3, 0.2], k=1)[0]
         
 
     # Create obstacle hitbox, different type, different hitbox
@@ -106,17 +106,20 @@ while running:
             (obstacle_x + obstacle_width, ground_y)])
     elif obstacle_type == "DOUBLE":
         pygame.draw.polygon(screen, (0, 0, 255), [
-            (obstacle_x, ground_y),
-            (obstacle_x + obstacle_width/2 - obstacle_width,  ground_y - obstacle_height), 
-            (obstacle_x + obstacle_width, ground_y)])
+          (obstacle_x, ground_y),
+          (obstacle_x + obstacle_width / 2, ground_y - obstacle_height),
+          (obstacle_x + obstacle_width, ground_y)
+        ])
+        
         pygame.draw.polygon(screen, (0, 0, 255), [
-            (obstacle_x, ground_y),
-            (obstacle_x + obstacle_width/2 - obstacle_width,  ground_y - obstacle_height), 
-            (obstacle_x + obstacle_width, ground_y)])
+          (obstacle_x-obstacle_width, ground_y),
+          (obstacle_x + obstacle_width / 2 - obstacle_width, ground_y - obstacle_height),
+          (obstacle_x, ground_y)
+        ])
     elif obstacle_type == "TALL":
         pygame.draw.polygon(screen, (0, 0, 255), [
             (obstacle_x, ground_y),
-            (obstacle_x + obstacle_width/2 - obstacle_width,  ground_y - 2*obstacle_height), 
+            (obstacle_x + obstacle_width/2,  ground_y - 2*obstacle_height), 
             (obstacle_x + obstacle_width, ground_y)])
 
     # Draw ground
