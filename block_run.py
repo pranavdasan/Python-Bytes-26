@@ -28,7 +28,7 @@ obstacle_height = 30
 obstacle_x = SCREEN_WIDTH # Spawn the obstacle off screen
 obstacle_speed = 2 
 obstacle_type = "SINGLE"
-possible_types = ["SINGLE", "DOUBLE", "TALL"]
+possible_types = ["SINGLE", "DOUBLE", "TALL", "FLYING"]
 
 # Ground variables
 ground_height = 20
@@ -88,8 +88,8 @@ while running:
         obstacle_x = SCREEN_WIDTH + random.randint(50, 250) # Puts it back to right of screen randomly
         score += 1 # Update score
         if score % 5 == 0:
-            life += 1
-        obstacle_type = random.choices(possible_types, weights=[0.5, 0.3, 0.2], k=1)[0]
+            life += 1 
+        obstacle_type = random.choices(possible_types, weights=[0, 0, 0, 1], k=1)[0]
         color = (random.randint(0, 200), random.randint(0, 200), 255)
         
 
@@ -100,7 +100,8 @@ while running:
         obstacle = pygame.Rect(obstacle_x-obstacle_width, ground_y - obstacle_height, 2*obstacle_width, obstacle_height*2)
     elif obstacle_type == "TALL":
         obstacle = pygame.Rect(obstacle_x, ground_y - 2*obstacle_height, obstacle_width, 2*obstacle_height)
-
+    elif obstacle_type == "FLYING":
+        obstacle = pygame.Rect(obstacle_x, ground_y-2*obstacle_height, obstacle_width, obstacle_height)
     # Create player hitbox
     player = pygame.Rect(player_x, player_y, player_size, player_size)
 
@@ -141,7 +142,12 @@ while running:
             (obstacle_x, ground_y),
             (obstacle_x + obstacle_width/2,  ground_y - 2*obstacle_height), 
             (obstacle_x + obstacle_width, ground_y)])
-
+    elif obstacle_type == "FLYING":
+        pygame.draw.polygon(screen, color, [
+            (obstacle_x, ground_y - obstacle_height*3/2),
+            (obstacle_x + obstacle_width,  ground_y - 2*obstacle_height), 
+            (obstacle_x + obstacle_width, ground_y - obstacle_height)            
+        ])
     # Draw ground
     pygame.draw.rect(screen, (0, 255, 0), (0, ground_y, SCREEN_WIDTH, ground_height))
 
