@@ -1,3 +1,5 @@
+import math
+
 import pygame 
 
 pygame.init()
@@ -18,7 +20,12 @@ player_size = 30
 player_x = 30
 player_y = SCREEN_HEIGHT - player_size - ground_height
 player_y_velocity = 0
-gravity = 10/fps
+gravity = 13/fps
+score = 0
+lives = 3
+
+# Load font
+font = pygame.font.Font(None, 36)
 
 # Obstacle variables
 obstacle_width = 30
@@ -45,14 +52,22 @@ while running:
     # Find keys being pressed
     keys = pygame.key.get_pressed()
 
-    if (keys[pygame.K_SPACE] or keys[pygame.K_w]):
+    if (keys[pygame.K_SPACE] or keys[pygame.K_w]) and player_y + player_size == ground_y:
         player_y_velocity = -6 
 
     # Apply gravity
     player_y_velocity += gravity
 
+    # Update obstacle speed
+    obstacle_speed = -3 + 20 / (1+math.e ** (-0.1 * (score - 10)))
+
     # Move obstacle
     obstacle_x -= obstacle_speed
+    
+    # Respawn obstacle
+    if obstacle_x + obstacle_width < 0:
+        obstacle_x = SCREEN_WIDTH
+        score += 1
     
     # Make player hitbox
     player = pygame.Rect(player_x,player_y, player_size, player_size)
@@ -63,12 +78,18 @@ while running:
     # Make obstacle hitbox
     obstacle = pygame.Rect(obstacle_x, ground_y - obstacle_height, obstacle_width, obstacle_height)
 
+    # Check collision with ground
     if player_y + player_size > ground_y:
         player_y_velocity = 0
         player_y = ground_y - player_size
 
+    # Check obstacle collisions
     if player.colliderect(obstacle):
-        running = False 
+        if lives > 1:
+            lives -= 1 # Lost a life
+            obstacle_x = SCREEN_WIDTH # Respawn obstacle
+        else:
+            running = False # Game over
 
     player_y += player_y_velocity
 
@@ -85,6 +106,14 @@ while running:
         (obstacle_x+obstacle_width/2, ground_y - obstacle_height),
         (obstacle_x + obstacle_width, ground_y)
     ])
+
+    # Draw score
+    score_text = font.render(f"Score: {score}", True, (0,0,0))
+    screen.blit(score_text, (10, 10))
+
+    # Draw lives
+    life_text = font.render(f"Life: {lives}", True, (0,0,0))
+    screen.blit(life_text, (200, 10))
 
     pygame.display.update()
     clock.tick(fps) # Sets FPS
